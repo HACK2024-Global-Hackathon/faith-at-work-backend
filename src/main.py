@@ -5,6 +5,11 @@ from fastapi.middleware import Middleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 from time import time
+from typing import Optional
+from utils.firestore_client import FirestoreClient
+
+fc = FirestoreClient()
+
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
     def __init__(self, app: FastAPI, limit: int, window: int):
@@ -46,13 +51,24 @@ app = FastAPI(middleware=[
     Middleware(RateLimitMiddleware, limit=10, window=10)
 ])
 
+
 @app.get("/")
-async def read_root():
-    return {"message": "Hello, World!"}
+async def root():
+    return {"message": "Hallelujah!"}
+
 
 @app.get("/events")
-async def get_events():
-    return []
+async def get_events(latitude: float, longitude: float, category: str, primary_church: str, age_bracket: str = "30-39", gender: str = "male", limit=5):
+    return fc.get_nearest_events(
+        latitude,
+        longitude,
+        category,
+        primary_church,
+        age_bracket,
+        gender,
+        limit=limit
+    )
+
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get('PORT', '8080')))
+    uvicorn.run("main:app", host="0.0.0.0", port=int(os.environ.get('PORT', '8080')), reload=True)
