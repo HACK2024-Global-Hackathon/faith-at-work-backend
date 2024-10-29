@@ -1,1 +1,4 @@
+pygeohash
 firebase-admin
+fastapi
+uvicorn

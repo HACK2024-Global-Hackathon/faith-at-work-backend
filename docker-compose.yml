@@ -1,0 +1,9 @@
+services:
+  faith-at-work-backend:
+    build: .  # Build the image from the Dockerfile in the current directory
+    ports:
+      - "8080:8080"  # Map port 8080 of the container to port 8080 on the host
+    volumes:
+      - .:/app  # Mount the current directory to /app in the container for live updates
+    environment:
+      - PYTHONUNBUFFERED=1  # Optional: Ensures that Python output is sent straight to terminal (unbuffered)

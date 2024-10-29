@@ -5,7 +5,10 @@
 todo
 
 # Quickstart
-todo 
+```bash
+pyenv local 3.12.7
+python src/main.py
+```
 
 # Developer setup (Linux/Mac)
 
@@ -18,20 +21,50 @@ apt install -y make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline
 curl https://pyenv.run | bash
 ```
 
-Update your .bashrc or .zshrc with pyenv env vars
+Append this to your .bashrc or .zshrc
 ```bash
-echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
-echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
-echo -e 'if command -v pyenv 1>/dev/null 2>&1; then\n eval "$(pyenv init -)"\nfi' >> ~/.bashrc
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+if command -v pyenv 1>/dev/null 2>&1; then
+ eval "$(pyenv init -)"
+fi
 ````
 
-Install specific Python version (change as needed)
+Setup Python virtual environment (change as needed)
 ```bash
 pyenv install 3.12.7
-```
-
-Activate Python version (change as needed)
-```bash
 pyenv versions
 pyenv local 3.12.7
+```
+
+Install docker and check that it is running (Optional) (Ubuntu)
+```bash
+sudo snap install docker
+docker --version
+
+sudo apt install docker-compose
+
+sudo snap disable docker
+sudo snap enable docker
+sudo snap start docker
+sudo snap services docker
+sudo addgroup --system docker
+sudo adduser $USER docker
+newgrp docker
+ls -l /var/run/docker.sock
+sudo chmod 666 /var/run/docker.sock
+
+docker-compose up --build
+docker-compose down
+```
+
+Deploy as Cloud Run Service
+```bash
+sudo snap install --classic google-cloud-cli
+
+gcloud auth login
+gcloud config set project faith-at-work-backend-440004
+gcloud config set run/region asia-east1
+
+gcloud run deploy faith-at-work-backend --timeout=60 --source .
 ```
