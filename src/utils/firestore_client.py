@@ -76,18 +76,21 @@ class FirestoreClient():
                 }
             )
         if len(results) == 0:
-            return {
-                "uuid": None,
-                "geohash7": None,
-                "latitude": latitude,
-                "longitude": longitude,
-                "interest_category": interest_category,
-                "image": None,
-                "image_url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F880368853%2F297979351972%2F1%2Foriginal.20241022-081741?w=940&auto=format%2Ccompress&q=75&sharp=10&s=aa7f1da5ed9c94642ef715f8dc2097d0",
-                "title": "#HACK2024 Showcase Saturday",
-                "summary": "See first-hand the innovative solutions that the teams have worked on for #HACK2024!",
-                "description": "Does your church or organisation face these issues?    Reaching more youths    Meeting community felt needs with other churches    Engaging donors and volunteers    Marketplace outreach & discipleshipFind out how tech can help!#HACK is the largest global Christian hackathon. Attended by thousands over 50 over cities, the Singapore chapter came together to define issues and derive creative solutions for these Kingdom challenges.We invite you to come and see first-hand the prototypes and the solutions, and discover new ways of growth in your ministry!",
-                "source": "Indigitous Singapore",
-                "eventbrite_url": "https://www.eventbrite.com/e/hack2024-showcase-saturday-tickets-1054556018439?utm-campaign=social&utm-content=attendeeshare&utm-medium=discovery&utm-term=listing&utm-source=cp&aff=ebdsshcopyurl",
-            }   
+            return [
+                {
+                    "uuid": None,
+                    "geohash7": None,
+                    "latitude": latitude,
+                    "longitude": longitude,
+                    "interest_category": interest_category,
+                    "image": None,
+                    "image_url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F880368853%2F297979351972%2F1%2Foriginal.20241022-081741?w=940&auto=format%2Ccompress&q=75&sharp=10&s=aa7f1da5ed9c94642ef715f8dc2097d0",
+                    "title": "#HACK2024 Showcase Saturday",
+                    "summary": "See first-hand the innovative solutions that the teams have worked on for #HACK2024!",
+                    "description": "Does your church or organisation face these issues?    Reaching more youths    Meeting community felt needs with other churches    Engaging donors and volunteers    Marketplace outreach & discipleshipFind out how tech can help!#HACK is the largest global Christian hackathon. Attended by thousands over 50 over cities, the Singapore chapter came together to define issues and derive creative solutions for these Kingdom challenges.We invite you to come and see first-hand the prototypes and the solutions, and discover new ways of growth in your ministry!",
+                    "source": "Indigitous Singapore",
+                    "eventbrite_url": "https://www.eventbrite.com/e/hack2024-showcase-saturday-tickets-1054556018439?utm-campaign=social&utm-content=attendeeshare&utm-medium=discovery&utm-term=listing&utm-source=cp&aff=ebdsshcopyurl",
+                },
+                # TODO: add more fallback events
+            ]
         return results
