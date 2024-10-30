@@ -41,16 +41,20 @@ class FirestoreClient():
         docs = query.stream()
         for doc in docs:
             d = doc.to_dict()
-            print(dir(doc))
-            print(d)
+            latitude, longitude = decode(d["geohash7"])
             results.append(
                 {
                     "uuid": doc.id,
                     "geohash7": d["geohash7"],
-                    # "image": d["image"]
-                    # "title": d["title"]
-                    # "summary": d["summary"],
-                    # "eventbrite_url": d["eventbrite_url"],
+                    "latitude": latitude,
+                    "longitude": longitude,
+                    "image": d.get("image"),
+                    "image_url": d.get("image_url"),
+                    "title": d.get("title"),
+                    "summary": d.get("summary"),
+                    "description": d.get("description"),
+                    "interest_category": d.get("interest_category"),
+                    "eventbrite_url": d.get("eventbrite_url"),
                 }
             )
         return results

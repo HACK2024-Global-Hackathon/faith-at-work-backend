@@ -2,8 +2,8 @@ import os
 import requests
 import json
 
-EVENTBRITE_API_KEY = os.environ.get("EVENTBRITE_API_KEY", "")
-EVENTBRITE_ORGANIZER_ID = os.environ.get("EVENTBRITE_ORGANIZER_ID", "")
+EVENTBRITE_API_KEY = os.environ.get("EVENTBRITE_API_KEY", "MYZF2ADC5S74OO76JFLO")
+EVENTBRITE_ORGANIZER_ID = os.environ.get("EVENTBRITE_ORGANIZER_ID", "2448287009931")
 
 
 class EventbriteClient():

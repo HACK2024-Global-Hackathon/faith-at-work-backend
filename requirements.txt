@@ -2,3 +2,4 @@ pygeohash
 firebase-admin
 fastapi
 uvicorn
+python-multipart

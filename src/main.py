@@ -58,16 +58,60 @@ async def root():
 
 
 @app.get("/events")
-async def get_events(latitude: float, longitude: float, category: str, primary_church: str, age_bracket: str = "30-39", gender: str = "male", limit=5):
+async def get_events(
+    latitude: float, 
+    longitude: float, 
+    interest_category: str, 
+    limit=5,
+):
     return fc.get_nearest_events(
-        latitude,
-        longitude,
-        category,
-        primary_church,
-        age_bracket,
-        gender,
-        limit=limit
+        latitude=latitude,
+        longitude=longitude,
+        interest_category=interest_category,
+        primary_church="",
+        life_stage="single_without_kids",
+        gender="female",
+        age_bracket="30-39",
+        limit=limit,
     )
+
+
+from pydantic import BaseModel
+
+class Event(BaseModel):
+    title: str
+    summary: str
+    description: str = None
+    ticket_count: int = 5
+
+
+
+# @app.post("/event")
+# async def create_event(event: Event):
+
+# from fastapi import File, UploadFile, Form
+
+# @app.post("/upload/")
+# async def upload_file(file: UploadFile = File(...), event: Event = Form(...)):
+#     if file.content_type not in ('image/jpg', 'image/jpeg'):
+#         raise HTTPException(status_code=400, detail="Invalid file type. Only JPG files are allowed.")
+
+#     return {"info": f"File '{file.filename}' uploaded successfully!"}
+
+
+# from fastapi import Form, File, UploadFile
+# from pydantic import BaseModel
+
+# class Event(BaseModel):
+#     title: str
+
+# @app.post("/upload/")
+# async def upload_file(file: UploadFile = File(...), event: Event = Form(...)):
+#     if file.content_type not in ('image/jpg', 'image/jpeg'):
+#         raise HTTPException(status_code=400, detail="Invalid file type. Only JPG files are allowed.")
+
+#     print(type(event))
+#     return {"filename": file.filename, "status": event}
 
 
 if __name__ == "__main__":
