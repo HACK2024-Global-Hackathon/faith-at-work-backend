@@ -1,8 +1,9 @@
 import os
 import uvicorn
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, APIRouter, HTTPException
 from fastapi.middleware import Middleware
 from starlette.middleware.base import BaseHTTPMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 from time import time
 from typing import Optional
@@ -51,6 +52,21 @@ app = FastAPI(middleware=[
     Middleware(RateLimitMiddleware, limit=10, window=10)
 ])
 
+origins = [
+    "http://localhost.tiangolo.com",
+    "https://localhost.tiangolo.com",
+    "http://localhost",
+    "http://localhost:8080",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @app.get("/")
 async def root():
@@ -76,14 +92,13 @@ async def get_events(
     )
 
 
-from pydantic import BaseModel
+# from pydantic import BaseModel
 
-class Event(BaseModel):
-    title: str
-    summary: str
-    description: str = None
-    ticket_count: int = 5
-
+# class Event(BaseModel):
+#     title: str
+#     summary: str
+#     description: str = None
+#     ticket_count: int = 5
 
 
 # @app.post("/event")
