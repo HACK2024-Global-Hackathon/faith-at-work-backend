@@ -68,7 +68,7 @@ async def get_events(
         latitude=latitude,
         longitude=longitude,
         interest_category=interest_category,
-        primary_church="",
+        primary_church="wesley_methodist",
         life_stage="single_without_kids",
         gender="female",
         age_bracket="30-39",

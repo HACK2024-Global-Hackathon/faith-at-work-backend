@@ -66,5 +66,5 @@ gcloud auth login
 gcloud config set project faith-at-work-backend-440004
 gcloud config set run/region asia-east1
 
-gcloud run deploy faith-at-work-backend --timeout=60 --source .
+gcloud run deploy faith-at-work-backend --timeout=600 --service-account 392395172966-compute@developer.gserviceaccount.com --memory=512Mi --region asia-east1 --source .
 ```

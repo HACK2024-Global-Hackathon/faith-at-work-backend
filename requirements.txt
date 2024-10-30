@@ -1,5 +1,6 @@
-pygeohash
+google-cloud-secret-manager
 firebase-admin
 fastapi
 uvicorn
 python-multipart
+pygeohash
