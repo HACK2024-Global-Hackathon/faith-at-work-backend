@@ -1,10 +1,13 @@
 import os
 import time
+import arrow
 import requests
 import json
 from uuid import uuid4
+from typing import Optional
 
 from schema.event import EventBase, Event
+from schema.resource import Resource
 from utils.geo_utils import encode
 
 
@@ -27,9 +30,15 @@ class EventbriteClient():
         return response.json()  # TODO: pydantic model if needed
 
 
-    def create_event(self, event_base: EventBase) -> Event:
+    def create_event(self, event_base: EventBase, resource: Optional[Resource] = None) -> Event:
         # Create an event draft
         url = f"https://www.eventbriteapi.com/v3/organizations/{EVENTBRITE_ORGANIZER_ID}/events/"
+
+        summary = event_base.summary
+        # Event summary. Limited to 140 characters.
+        if len(summary) > 140:
+            summary = summary[:136] + " ..."
+        print(summary)
 
         payload = json.dumps({
           "event": {
@@ -38,13 +47,13 @@ class EventbriteClient():
             },
             "start": {
               "timezone": "Asia/Singapore",
-              "utc": "2024-12-01T02:00:00Z"
+              "utc": arrow.get(event_base.datetime_start, tzinfo="Asia/Singapore").to("UTC").format("YYYY-MM-DDTHH:mm:ss") + "Z"
             },
             "end": {
               "timezone": "Asia/Singapore",
-              "utc": "2024-12-01T05:00:00Z"
+              "utc": arrow.get(event_base.datetime_end, tzinfo="Asia/Singapore").to("UTC").format("YYYY-MM-DDTHH:mm:ss") + "Z"
             },
-            "summary": event_base.summary,
+            "summary": summary,
             "currency": "SGD",
             "online_event": False,
             "listed": True,
@@ -128,71 +137,38 @@ class EventbriteClient():
         response = requests.post(event_update_url, headers=self.headers, data=update_data)
         response.raise_for_status()
 
-        # current_version = 1  # Increment this each time you update
+        # Add more structured content in the "About this event" section
+        # TODO: map suggested resources/videos from input or more dynamically
+        if resource:
+            url = f"https://www.eventbriteapi.com/v3/events/{EVENT_ID}/structured_content/1/"
 
-        # # Update description
-        # data = {
-        #     "modules": [
-        #         {
-        #             "data": {
-        #                 "body": { 
-        #                     "alignment": "left",
-        #                     "text": "<h2>Hello World</h2><ul><li>Hello Northern Hemisphere</li><li>Hello Southern Hempisphere</li></ul><p></p><p>It&#x27;s a <em>beautiful</em> day today!</p>",          
-        #                 }
-        #             },
-        #             "type": "text",
-        #             "id": EVENT_ID
-        #         }
-        #     ],
-        #     "publish": True,
-        #     "purpose": "listing"
-        # }
+            payload = json.dumps({
+              "modules": [
+                {
+                  "type": "text",
+                  "data": {
+                    "body": {
+                      "type": "text",
+                      "text": f"<p>Join us for an exciting event!</p><p>For help with organizing, please check out <a href='{resource.url}'>these resources</a>.</p>"
+                    }
+                  }
+                },
+                {
+                    "type": "video",
+                    "data": {
+                        "video": {
+                            "url": "https://youtu.be/UNluWO_hlkY?si=Ob6UhowWqF-S9xF0",
+                            "display_size": "large"
+                        }
+                    }
+                }
+              ],
+              "purpose": "listing",
+              "publish": True
+            })
 
-        # # Construct the URL for the API request
-        # url = f'https://www.eventbriteapi.com/v3/events/{EVENT_ID}/structured_content/{current_version}'
-
-        # # Make the POST request to update the event description
-        # response = requests.post(url, headers=self.headers, data=json.dumps(data))
-        # response.raise_for_status()
-
-        # # Upload video
-        # video_url = "https://youtu.be/UNluWO_hlkY?si=Ob6UhowWqF-S9xF0"
-
-        # # Prepare the data payload for the request
-        # data = {
-        #     "modules": [
-        #         {
-        #             "type": "video",
-        #             "data": {
-        #                 "video": {
-        #                     "url": video_url,
-        #                     "display_size": "large"
-        #                 }
-        #             }
-        #         }
-        #     ],
-        #     "publish": True,
-        #     "purpose": "listing"
-        # }
-
-        # # Construct the URL for the API request
-        # url = f'https://www.eventbriteapi.com/v3/events/{EVENT_ID}/structured_content/{current_version}'
-
-        # response = requests.post(url, headers=self.headers, data=json.dumps(data))
-        # response.raise_for_status()
-
-        # print(response.json())
-
-
-        # Publish the event
-        url = f"https://www.eventbriteapi.com/v3/events/{EVENT_ID}/publish/"
-
-        payload = {}
-        response = requests.request("POST", url, headers=self.headers, data={})
-        response.raise_for_status()
-
-        if response.json()["published"] is not True:
-            raise Exception(f"failed to publish event: {response.reason}")
+            response = requests.request("POST", url, headers=self.headers, data=payload)
+            response.raise_for_status()
 
         return Event(
             eventbrite_event_id=EVENT_ID,

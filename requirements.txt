@@ -1,3 +1,4 @@
+arrow
 google-cloud-secret-manager
 firebase-admin
 fastapi

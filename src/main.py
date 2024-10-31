@@ -100,7 +100,7 @@ async def get_relevant_events(
     )
 
 
-@app.get("/event")
+@app.get("/eventbrite_event")
 async def get_event_by_id(event_id):
     return mgr.get_event(event_id)
 

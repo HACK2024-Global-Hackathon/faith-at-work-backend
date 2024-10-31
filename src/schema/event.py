@@ -1,4 +1,8 @@
 from pydantic import BaseModel
+from typing import Union, Dict
+
+from schema.resource import Resource
+
 
 class EventFilter(BaseModel):
     interest_category: str
@@ -13,7 +17,7 @@ class EventBase(EventFilter):
     image_url: str
     max_capacity: int = 5
     organizer: str = "#HACK2024"
-    resource: str = "/resources/dXddxiQkQsHBJep7XT7Q"
+    resource: Union[str, Resource] = "resources/dXddxiQkQsHBJep7XT7Q"
     summary: str
     title: str
 

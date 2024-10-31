@@ -5,6 +5,7 @@ from firebase_admin import firestore
 # import google.auth
 from google.cloud import secretmanager
 from google.cloud.firestore_v1.base_query import FieldFilter, Or
+from google.cloud.firestore import DocumentReference
 
 import json
 import requests
@@ -15,19 +16,8 @@ from utils.eventbrite_client import EventbriteClient
 from utils.ranking import calculate_relevance_score
 from schema.event import EventBase, Event, EventResult, EventFilter
 from schema.profile import UserProfile
-
-
-def to_prepared_data(doc, event_filter: EventFilter) -> EventResult:
-    event = Event(**doc.to_dict())
-    elat, elong = decode(event.geohash7)
-    dist_m = euclidean_distance(event_filter.latitude, event_filter.longitude, elat, elong)
-
-    return EventResult(
-        uuid=doc.id,
-        distance_m=dist_m,
-        relevance_score=calculate_relevance_score(dist_m, event_filter, event),
-        **event.dict(),
-    )
+from schema.resource import Resource
+from pydantic import ValidationError
 
 
 class EventsManager():
@@ -55,7 +45,24 @@ class EventsManager():
         self.eventbrite_client = EventbriteClient()
 
 
-    def get_event(self, eventbrite_event_id: str) -> dict:
+    def to_prepared_data(self, doc, event_filter: EventFilter) -> EventResult:
+        doc_data = doc.to_dict()
+        event = Event(**doc_data)
+        elat, elong = decode(event.geohash7)
+        dist_m = euclidean_distance(event_filter.latitude, event_filter.longitude, elat, elong)
+
+        # expect a string like resources/dXddxiQkQsHBJep7XT7Q
+        doc_data["resource"] = self.db.document(doc_data["resource"]).get().to_dict()
+
+        return EventResult(
+            uuid=doc.id,
+            distance_m=dist_m,
+            relevance_score=calculate_relevance_score(dist_m, event_filter, event),
+            **doc_data,
+        )
+
+
+    def get_eventbrite_event(self, eventbrite_event_id: str) -> dict:
         """
         {
             "name": {
@@ -143,7 +150,8 @@ class EventsManager():
 
 
     def create_event(self, event_base: EventBase) -> Event:
-        event = self.eventbrite_client.create_event(event_base)
+        resource = Resource(**self.db.document(event_base.resource).get().to_dict())
+        event = self.eventbrite_client.create_event(event_base, resource=resource)
         print(event.dict())
         self.events_collection.document().set(event.dict())
         return event
@@ -166,7 +174,7 @@ class EventsManager():
 
         docs = query.stream()
         for doc in docs:
-            prepared_data = to_prepared_data(doc, event_filter)
+            prepared_data = self.to_prepared_data(doc, event_filter)
             results.append(prepared_data)
 
         # geohash6: ±0.61 km (0.38 mi; 610 m)
@@ -177,7 +185,7 @@ class EventsManager():
 
             docs = query.stream()
             for doc in docs:
-                prepared_data = to_prepared_data(doc, event_filter)
+                prepared_data = self.to_prepared_data(doc, event_filter)
                 results.append(prepared_data)
 
         # query by less precise geohash and broaden to interest_category match
@@ -195,7 +203,7 @@ class EventsManager():
             
             docs = query.stream()
             for doc in docs:
-                prepared_data = to_prepared_data(doc, event_filter)
+                prepared_data = self.to_prepared_data(doc, event_filter)
                 results.append(prepared_data)
 
         # remove duplicates 
@@ -205,9 +213,5 @@ class EventsManager():
         results = sorted(results[:limit], key=lambda e: e.relevance_score, reverse=True)
         
         if len(results) == 0:
-            print("using fallback data...")
-            return [
-                to_prepared_data(self.events_collection.document("47G9mC5aeSkXx83mD0I2").get())
-                # TODO: add more fallback events
-            ]
+            print("No results found!")
         return results
