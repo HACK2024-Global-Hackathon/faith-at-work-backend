@@ -100,6 +100,11 @@ async def get_relevant_events(
     )
 
 
+@app.get("/event")
+async def get_event_by_id(event_id):
+    return mgr.get_event(event_id)
+
+
 @app.post("/event/")
 async def create_event(event: EventBase):
     return mgr.create_event(event)

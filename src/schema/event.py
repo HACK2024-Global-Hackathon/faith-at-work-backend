@@ -19,11 +19,12 @@ class EventBase(EventFilter):
 
 
 class Event(EventBase):
+    eventbrite_event_id: str
+    eventbrite_url: str
     geohash5: str
     geohash6: str
     geohash7: str
-    eventbrite_url: str
-        
+     
 
 class EventResult(Event):
     uuid: str

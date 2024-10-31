@@ -7,6 +7,7 @@ from uuid import uuid4
 from schema.event import EventBase, Event
 from utils.geo_utils import encode
 
+
 EVENTBRITE_API_KEY = os.environ.get("EVENTBRITE_API_KEY", "MYZF2ADC5S74OO76JFLO")
 EVENTBRITE_ORGANIZER_ID = os.environ.get("EVENTBRITE_ORGANIZER_ID", "2448287009931")
 
@@ -17,6 +18,14 @@ class EventbriteClient():
           'Content-Type': 'application/json',
           'Authorization': f'Bearer {EVENTBRITE_API_KEY}',
         }
+
+
+    def get_event(self, event_id: str) -> dict:
+        url = f"https://www.eventbriteapi.com/v3/events/{event_id}"
+        response = requests.request("GET", url, headers=self.headers)
+        response.raise_for_status()
+        return response.json()  # TODO: pydantic model if needed
+
 
     def create_event(self, event_base: EventBase) -> Event:
         # Create an event draft
@@ -186,20 +195,10 @@ class EventbriteClient():
             raise Exception(f"failed to publish event: {response.reason}")
 
         return Event(
-            datetime_start=event_base.datetime_start,
-            datetime_end=event_base.datetime_end,
-            description=event_base.description,
-            image_url=event_base.image_url,
-            interest_category=event_base.interest_category,
-            latitude=event_base.latitude,
-            longitude=event_base.longitude,
-            max_capacity=event_base.max_capacity,
-            organizer=event_base.organizer,
-            resource=event_base.resource,
-            summary=event_base.summary,
-            title=event_base.title,
+            eventbrite_event_id=EVENT_ID,
+            eventbrite_url=EVENT_URL,
             geohash5=encode(event_base.latitude, event_base.longitude, 5),
             geohash6=encode(event_base.latitude, event_base.longitude, 6),
-            geohash7=encode(event_base.latitude, event_base.longitude, 7),
-            eventbrite_url=EVENT_URL,
+            geohash7=encode(event_base.latitude, event_base.longitude, 7),            
+            **event_base.dict(),
         )
