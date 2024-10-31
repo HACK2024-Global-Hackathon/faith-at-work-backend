@@ -7,9 +7,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 from time import time
 from typing import Optional
-from utils.firestore_client import FirestoreClient
+from utils.events_manager import EventsManager
+from schema.event import EventFilter, EventBase
+from schema.profile import UserProfile
 
-fc = FirestoreClient()
+mgr = EventsManager()
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
@@ -75,59 +77,32 @@ async def root():
 
 
 @app.get("/events")
-async def get_events(
+async def get_relevant_events(
     latitude: float, 
     longitude: float, 
     interest_category: str, 
-    limit=5,
+    limit=100,
 ):
-    return fc.get_nearest_events(
-        latitude=latitude,
-        longitude=longitude,
-        interest_category=interest_category,
-        primary_church="wesley_methodist",
-        life_stage="single_without_kids",
-        gender="female",
-        age_bracket="30-39",
+    return mgr.get_relevant_events(
+        event_filter=EventFilter(
+            interest_category=interest_category,
+            latitude=latitude,
+            longitude=longitude,
+        ),
+        user_profile=UserProfile(
+            primary_church="wesley_methodist",
+            life_stage="married_with_kids",
+            age_bracket="30-39",
+            gender="male",
+            industry="tech",
+        ),
         limit=limit,
     )
 
 
-# from pydantic import BaseModel
-
-# class Event(BaseModel):
-#     title: str
-#     summary: str
-#     description: str = None
-#     ticket_count: int = 5
-
-
-# @app.post("/event")
-# async def create_event(event: Event):
-
-# from fastapi import File, UploadFile, Form
-
-# @app.post("/upload/")
-# async def upload_file(file: UploadFile = File(...), event: Event = Form(...)):
-#     if file.content_type not in ('image/jpg', 'image/jpeg'):
-#         raise HTTPException(status_code=400, detail="Invalid file type. Only JPG files are allowed.")
-
-#     return {"info": f"File '{file.filename}' uploaded successfully!"}
-
-
-# from fastapi import Form, File, UploadFile
-# from pydantic import BaseModel
-
-# class Event(BaseModel):
-#     title: str
-
-# @app.post("/upload/")
-# async def upload_file(file: UploadFile = File(...), event: Event = Form(...)):
-#     if file.content_type not in ('image/jpg', 'image/jpeg'):
-#         raise HTTPException(status_code=400, detail="Invalid file type. Only JPG files are allowed.")
-
-#     print(type(event))
-#     return {"filename": file.filename, "status": event}
+@app.post("/event/")
+async def create_event(event: EventBase):
+    return mgr.create_event(event)
 
 
 if __name__ == "__main__":
