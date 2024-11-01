@@ -1,4 +1,5 @@
 arrow
+haversine
 google-cloud-secret-manager
 firebase-admin
 fastapi

@@ -1,0 +1,32 @@
+[
+    {
+        "interest_category": "fellowship",
+        "latitude": 45.6,
+        "longitude": -123.4,
+        "datetime_start": "2024-11-30:13:30:00",
+        "datetime_end": "2024-11-30:14:00:00",
+        "description": "Example description",
+        "image_url": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F880368853%2F297979351972%2F1%2Foriginal.20241022-081741?w=940&auto=format%2Ccompress&q=75&sharp=10&s=aa7f1da5ed9c94642ef715f8dc2097d0",
+        "max_capacity": 5,
+        "organizer": "#HACK2024",
+        "resource": {
+            "source": "Cru",
+            "title": "Beginning and Leading a Small Group: Mapping Your Strategy",
+            "description": "Step-by-step guide to starting a small group",
+            "summary": "small group",
+            "url": "https://www.cru.org/us/en/train-and-grow/help-others-grow/leading-small-groups/launching-and-leading-a-small-group.html",
+            "category": "biblestudy"
+        },
+        "summary": "Example summary",
+        "title": "Example title",
+        "eventbrite_event_id": "123",
+        "eventbrite_url": "https://www.eventbrite.com/e/hack2024-showcase-saturday-tickets-1054556018439?utm-campaign=social&utm-content=attendeeshare&utm-medium=discovery&utm-term=listing&utm-source=cp&aff=ebdsshcopyurl",
+        "geohash5": "aa",
+        "geohash6": "bb",
+        "geohash7": "cc",
+        "uuid": "schema",
+        "distance_m": 10408601.798292939,
+        "walking_time_mins": 216845.87079776954,
+        "relevance_score": 0.0
+    }
+]

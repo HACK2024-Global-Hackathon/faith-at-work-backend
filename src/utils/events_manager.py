@@ -3,7 +3,6 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 
 # import google.auth
-from google.cloud import secretmanager
 from google.cloud.firestore_v1.base_query import FieldFilter, Or
 from google.cloud.firestore import DocumentReference
 
@@ -11,9 +10,11 @@ import json
 import requests
 from typing import List, Dict
 
-from utils.geo_utils import encode, decode, euclidean_distance
+from utils.geo_utils import encode, decode, get_walking_estimate_haversine
 from utils.eventbrite_client import EventbriteClient
 from utils.ranking import calculate_relevance_score
+from utils.secret_manager import get_secret
+
 from schema.event import EventBase, Event, EventResult, EventFilter
 from schema.profile import UserProfile
 from schema.resource import Resource
@@ -22,14 +23,12 @@ from pydantic import ValidationError
 
 class EventsManager():
     def __init__(self):
-        client = secretmanager.SecretManagerServiceClient()
-        secret_name = "projects/392395172966/secrets/firestore-keyfile/versions/1"
-        response = client.access_secret_version(request={"name": secret_name})
-        json_data = response.payload.data.decode("utf-8")
-        secrets = json.loads(json_data)
-
         try: 
-            firebase_admin.initialize_app(credentials.Certificate(secrets))
+            firebase_admin.initialize_app(
+                credentials.Certificate(
+                    json.loads(get_secret("firestore-keyfile"))
+                )
+            )
         except ValueError:
             """
             ValueError: The default Firebase app already exists.
@@ -40,8 +39,7 @@ class EventsManager():
             pass
 
         self.db = firestore.client()
-        self.events_collection = self.db.collection('events_tmp')
-
+        self.events_collection = self.db.collection('activities')
         self.eventbrite_client = EventbriteClient()
 
 
@@ -49,15 +47,17 @@ class EventsManager():
         doc_data = doc.to_dict()
         event = Event(**doc_data)
         elat, elong = decode(event.geohash7)
-        dist_m = euclidean_distance(event_filter.latitude, event_filter.longitude, elat, elong)
+        walking_data = get_walking_estimate_haversine(event_filter.latitude, event_filter.longitude, elat, elong)
 
         # expect a string like resources/dXddxiQkQsHBJep7XT7Q
         doc_data["resource"] = self.db.document(doc_data["resource"]).get().to_dict()
 
+        distance_m = walking_data["distance_m"]
         return EventResult(
             uuid=doc.id,
-            distance_m=dist_m,
-            relevance_score=calculate_relevance_score(dist_m, event_filter, event),
+            distance_m=distance_m,
+            walking_time_mins=walking_data["walking_time_mins"],
+            relevance_score=calculate_relevance_score(distance_m, event_filter, event),
             **doc_data,
         )
 
@@ -152,7 +152,6 @@ class EventsManager():
     def create_event(self, event_base: EventBase) -> Event:
         resource = Resource(**self.db.document(event_base.resource).get().to_dict())
         event = self.eventbrite_client.create_event(event_base, resource=resource)
-        print(event.dict())
         self.events_collection.document().set(event.dict())
         return event
 

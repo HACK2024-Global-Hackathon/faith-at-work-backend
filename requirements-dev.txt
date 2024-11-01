@@ -1,4 +1,6 @@
 ipython
+pytest
+pre-commit
 gcloud-cli
 docker
 docker-compose

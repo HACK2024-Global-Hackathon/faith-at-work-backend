@@ -9,17 +9,17 @@ from typing import Optional
 from schema.event import EventBase, Event
 from schema.resource import Resource
 from utils.geo_utils import encode
-
-
-EVENTBRITE_API_KEY = os.environ.get("EVENTBRITE_API_KEY", "MYZF2ADC5S74OO76JFLO")
-EVENTBRITE_ORGANIZER_ID = os.environ.get("EVENTBRITE_ORGANIZER_ID", "2448287009931")
+from utils.secret_manager import get_secret
 
 
 class EventbriteClient():
     def __init__(self):
+        self.organizer_id = get_secret("eventbrite-organizer-id")
+        self.api_key = get_secret("eventbrite-api-key")
+
         self.headers = {
           'Content-Type': 'application/json',
-          'Authorization': f'Bearer {EVENTBRITE_API_KEY}',
+          'Authorization': f'Bearer {self.api_key}',
         }
 
 
@@ -32,13 +32,12 @@ class EventbriteClient():
 
     def create_event(self, event_base: EventBase, resource: Optional[Resource] = None) -> Event:
         # Create an event draft
-        url = f"https://www.eventbriteapi.com/v3/organizations/{EVENTBRITE_ORGANIZER_ID}/events/"
+        url = f"https://www.eventbriteapi.com/v3/organizations/{self.organizer_id}/events/"
 
         summary = event_base.summary
         # Event summary. Limited to 140 characters.
         if len(summary) > 140:
             summary = summary[:136] + " ..."
-        print(summary)
 
         payload = json.dumps({
           "event": {
@@ -69,11 +68,11 @@ class EventbriteClient():
 
         response_data = response.json()
 
-        EVENT_ID = response_data["id"]
-        EVENT_URL = response_data["url"]
+        event_id = response_data["id"]
+        event_url = response_data["url"]
 
         # Create a ticket class
-        url = f"https://www.eventbriteapi.com/v3/events/{EVENT_ID}/ticket_classes/"
+        url = f"https://www.eventbriteapi.com/v3/events/{event_id}/ticket_classes/"
 
         payload = json.dumps({
           "ticket_class": {
@@ -90,7 +89,7 @@ class EventbriteClient():
         media_upload_url = "https://www.eventbriteapi.com/v3/media/upload/"
         upload_params = {
             'type': 'image-event-logo',
-            'token': EVENTBRITE_API_KEY
+            'token': self.api_key
         }
         
         response = requests.get(media_upload_url, params=upload_params)
@@ -120,7 +119,7 @@ class EventbriteClient():
             pass
 
         # Notify that the media was uploaded
-        notify_url = media_upload_url + '?token=' + EVENTBRITE_API_KEY # TODO: properly URL encode token
+        notify_url = media_upload_url + '?token=' + self.api_key # TODO: properly URL encode token
         update_data = json.dumps({
             'upload_token': media_upload_instructions['upload_token'],
             'crop_mask': {'top_left': {'y':1, 'x':1}, 
@@ -132,7 +131,7 @@ class EventbriteClient():
 
         # Assign the uploaded image to the event
         uploaded_image_id = response.json()['id']
-        event_update_url = f"https://www.eventbriteapi.com/v3/events/{EVENT_ID}/"
+        event_update_url = f"https://www.eventbriteapi.com/v3/events/{event_id}/"
         update_data = json.dumps({"event": {"logo_id": uploaded_image_id}})
         response = requests.post(event_update_url, headers=self.headers, data=update_data)
         response.raise_for_status()
@@ -140,7 +139,7 @@ class EventbriteClient():
         # Add more structured content in the "About this event" section
         # TODO: map suggested resources/videos from input or more dynamically
         if resource:
-            url = f"https://www.eventbriteapi.com/v3/events/{EVENT_ID}/structured_content/1/"
+            url = f"https://www.eventbriteapi.com/v3/events/{event_id}/structured_content/1/"
 
             payload = json.dumps({
               "modules": [
@@ -170,9 +169,17 @@ class EventbriteClient():
             response = requests.request("POST", url, headers=self.headers, data=payload)
             response.raise_for_status()
 
+        # Publish the event
+        url = f"https://www.eventbriteapi.com/v3/events/{event_id}/publish/"
+        response = requests.request("POST", url, headers=self.headers, data={})
+        response.raise_for_status()
+
+        if response.json()["published"] is not True:
+            raise Exception(f"failed to publish event: {response.reason}")
+
         return Event(
-            eventbrite_event_id=EVENT_ID,
-            eventbrite_url=EVENT_URL,
+            eventbrite_event_id=event_id,
+            eventbrite_url=event_url,
             geohash5=encode(event_base.latitude, event_base.longitude, 5),
             geohash6=encode(event_base.latitude, event_base.longitude, 6),
             geohash7=encode(event_base.latitude, event_base.longitude, 7),            
