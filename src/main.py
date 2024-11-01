@@ -72,7 +72,7 @@ app.add_middleware(
 )
 
 
-@lru_cache(maxsize=1000)
+@lru_cache(maxsize=10)
 def load_data(
     latitude: float, 
     longitude: float, 
