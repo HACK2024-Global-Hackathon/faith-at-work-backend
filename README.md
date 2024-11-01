@@ -2,7 +2,35 @@
 #HACK2024 missional challenge: To Gather Christians to reach their workplace for Christ
 
 # Overview
-todo
+```mermaid
+C4Context
+    title System Context Diagram for Faith@Work
+
+    Person(user, "User", "A person who registers for events.")
+    Person(organizer, "Organizer", "A person who organizes events.")
+    Person(admin, "Admin", "A person responsible for verifying organizers and maintaining the system.")
+
+    System(eventSystem, "Faith@Work", "Marketplace for Christian community")
+
+    Rel(user, eventSystem, "Registers for events")
+    Rel(organizer, eventSystem, "Creates events")
+    Rel(admin, eventSystem, "Maintains the system")
+
+    UpdateElementStyle(customerA, $fontColor="red", $bgColor="grey", $borderColor="red")
+    UpdateRelStyle(customerA, SystemAA, $textColor="blue", $lineColor="blue", $offsetX="5")
+    UpdateRelStyle(SystemAA, SystemE, $textColor="blue", $lineColor="blue", $offsetY="-10")
+    UpdateRelStyle(SystemAA, SystemC, $textColor="blue", $lineColor="blue", $offsetY="-40", $offsetX="-50")
+    UpdateRelStyle(SystemC, customerA, $textColor="red", $lineColor="red", $offsetX="-50", $offsetY="20")
+
+    UpdateLayoutConfig($c4ShapeInRow="3", $c4BoundaryInRow="1")
+```
+
+## Teck stack
+- Vue.js
+- Cloud Run Service
+- Cloud Firestore
+- Eventbrite API
+
 
 # Quickstart
 ```bash
