@@ -10,6 +10,7 @@ from typing import Optional
 from utils.events_manager import EventsManager
 from schema.event import EventFilter, EventBase
 from schema.profile import UserProfile
+from functools import lru_cache
 
 mgr = EventsManager()
 
@@ -71,13 +72,8 @@ app.add_middleware(
 )
 
 
-@app.get("/")
-async def root():
-    return {"message": "Hallelujah!"}
-
-
-@app.get("/events")
-async def get_relevant_events(
+@lru_cache(maxsize=1000)
+def load_data(
     latitude: float, 
     longitude: float, 
     interest_category: str, 
@@ -98,6 +94,21 @@ async def get_relevant_events(
         ),
         limit=limit,
     )
+
+
+@app.get("/")
+async def root():
+    return {"message": "Hallelujah!"}
+
+
+@app.get("/events")
+async def get_relevant_events(
+    latitude: float, 
+    longitude: float, 
+    interest_category: str, 
+    limit=100,
+):
+    return load_data(latitude, longitude, interest_category, limit=limit)
 
 
 @app.get("/eventbrite_event")
