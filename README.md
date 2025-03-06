@@ -8,7 +8,9 @@ The browser-based app shows how a user can quickly find suitable discipleship or
 
 # Product presentation
 
-<a href="assets/#HACK2024 - Faith@Work.pdf" class="image fit"><img src="assets/pdf_first_page.png" alt=""></a>
+<a href="assets/%23HACK2024%20-%20Faith%40Work.pdf" target="_blank" class="image fit">
+    <img src="assets/pdf_first_page.png" alt="PDF First Page">
+</a>
 
 
 # Architecture overview
