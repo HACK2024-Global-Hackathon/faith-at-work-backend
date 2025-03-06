@@ -1,17 +1,16 @@
 # faith-at-work-backend
 #HACK2024 missional challenge: To Gather Christians to reach their workplace for Christ
 
-# Demo
+# Product demo
 The browser-based app shows how a user can quickly find suitable discipleship or fellowship activities near their workplace.
 
 ![](https://github.com/HACK2024-Global-Hackathon/faith-at-work-backend/blob/5fe3ddd43da87deaa598c002ecf47943bbddff10/assets/%23HACK2024%20-%20Faith%40Work.gif)
 
-# Product presentation
+# Product slide deck
 
 <a href="assets/%23HACK2024%20-%20Faith%40Work.pdf" target="_blank" class="image fit">
     <img src="assets/pdf_first_page.png" alt="PDF First Page">
 </a>
-
 
 # Architecture overview
 ```mermaid
