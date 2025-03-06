@@ -1,7 +1,12 @@
 # faith-at-work-backend
 #HACK2024 missional challenge: To Gather Christians to reach their workplace for Christ
 
-# Overview
+# Demo
+
+![]https://github.com/HACK2024-Global-Hackathon/faith-at-work-backend/blob/5fe3ddd43da87deaa598c002ecf47943bbddff10/assets/%23HACK2024%20-%20Faith%40Work.gif
+
+
+# Architecture overview
 ```mermaid
 C4Context
     title System Context Diagram for Faith@Work
