@@ -1,6 +1,8 @@
 # Faith@Work
 A browser-based app called Faith@Work, to connect Christians at their workplace
 
+![](https://github.com/HACK2024-Global-Hackathon/faith-at-work-backend/blob/5806c3e032200b84fa323b92e4b382584852812e/assets/Groupphoto.jpg)
+
 Developed by Tommy Lim, John Yong, Chin Wanying, Kenny Tan, Bryan Sim, Peter Tan during [#HACK2024](https://hack.indigitous.org/hack2024/)
 
 # Introduction
